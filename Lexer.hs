@@ -5,13 +5,6 @@ import Data.Char
 import Data.List
 
 
-
-{--main = do
-  putStrLn "I'd like something to calculate please! "
-  exprs <- getLine
-  let tokens = tokenizeLine $ separateStrings $ words exprs
-  print tokens--}
-
 data Operator = Plus | Minus | Mult | Div | Mod | Exp  
               deriving ( Read, Show )
 instance Eq Operator where
@@ -104,25 +97,29 @@ isValidSep x
   | otherwise = False
                 where validSeps = ["(", ")", "[", "]"]
 
-
-                      
---lex :: String -> [Token a]
---lex x = map lexOp $ map  splitOnOp $ words x
-                 
+isValidSepChar :: Char -> Bool
+isValidSepChar x
+  | x `elem` validSeps = True
+  | otherwise = False
+              where validSeps = ['(', ')', '[', ']']
+                    
 -- We will not force operations to be separated by whitespace
 -- so will need to separate out operations from strings of digits
 splitOnOp :: String -> [String]
 splitOnOp [] = [] 
 splitOnOp [x] = [[x]]
 splitOnOp (x:xs)
-  | isValidOpChar x = [[]]++[[x]]++splitOnOp xs
-  | otherwise = (x:(head $ splitOnOp xs)):(tail $ splitOnOp xs)
+  | isValidOpChar x = [x]:splitOnOp xs
+  | isValidSepChar x = [x]:splitOnOp xs
+  | otherwise = if ((isValidOpChar $ head xs) || (isValidSepChar $ head xs))
+                   then [x]:splitOnOp xs
+                   else (x:(head $ splitOnOp xs)):(tail $ splitOnOp xs)
+
 
 separateStrings :: [String] -> [String]
 separateStrings [] = []
 separateStrings [x] = splitOnOp x
 separateStrings (x:xs) = (splitOnOp x)++(separateStrings xs)
-  --(splitOnOp)++(separateStrings xs)
 
 
 tokenize ::String -> Token 
