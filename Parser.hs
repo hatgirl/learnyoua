@@ -2,21 +2,31 @@ import Lexer
 import Stack
 import Queue
 import Data.Fixed(mod')
+import System.IO
 
+yesno :: String -> IO Bool
+yesno prompt = do
+  putStr $ prompt ++ " y/n: \n"
+  hFlush stdout
+  str <- getLine
+  case str of
+    "y" -> return True
+    "n" -> return False
+    _ -> do 
+        putStrLn "Invalid response. Please answer y/n."
+        yesno prompt  
+
+main :: IO()
 main = do
-  putStrLn "I'd like something to calculate please! "
-  exprs <- getLine
-  let sep = words exprs
-  print sep
-  let separated = separateStrings sep
-  print separated 
-  let tokens = tokenizeLine $ separateStrings $ words exprs
-  print tokens
+  putStr "I'd like something to calculate please! \n"
+  calc <- getLine
+  let tokens = tokenizeLine $ separateStrings $ words calc
   let parsed = parse tokens (Queue [] []) (Stack [])
-  print parsed
-  let munched = munch parsed
-  print munched
-
+  let answer = munch parsed
+  print answer
+  continue <- yesno "Maybe you need something else calculated?"
+  if continue then main else return ()
+    
 
 parse :: [Token] -> (Queue Token) -> (Stack Token) -> [Token]
 parse [] output ops
